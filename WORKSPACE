@@ -10,7 +10,16 @@ http_archive(
 
 http_file(
     name = "music",
-    urls = ["https://upload.wikimedia.org/wikipedia/commons/2/29/Richard_Wagner_-_Ride_of_the_Valkyries.ogg"]
+    downloaded_file_path = "music.ogg",
+    urls = ["https://upload.wikimedia.org/wikipedia/commons/1/11/Haydn_StringQuartetInDMajorOp.64_JosephHaydn-StringQuartetInDOp.645H363Lark-01-AllegroModerato.ogg"],
+    sha256 = "b355d0857ba7ef6f235fbac9b758c4978a7e99ea8f0feacdedf2cddd876bf7dc"
+)
+
+http_file(
+    name = "OggVorbois",
+    downloaded_file_path = "OggVorbois.h",
+    urls = ["https://raw.githubusercontent.com/nothings/stb/master/stb_vorbis.c"],
+    sha256 = "4f4fcc760b4fe6961ea528f2a8ba9d91a888ab0e44dc1bdb779dae8efae0ebcd"
 )
 
 #graphics
@@ -21,6 +30,12 @@ http_archive(
     sha256 = "6e9034e1f5dd94524cd96c951e8c928a0ea91649d87f8aeb87e25045fa66ba4b",
 )
 
+http_archive(
+    name = "glew",
+    urls = ["https://github.com/Lunarsong/glew/archive/a38094b249974f219f9c23f54b5b60a620777a13.zip"],
+    strip_prefix = "glew-a38094b249974f219f9c23f54b5b60a620777a13",
+    build_file = "glew.BUILD",
+)
 
 # Asset Loader
 http_archive(

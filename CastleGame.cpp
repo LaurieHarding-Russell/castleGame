@@ -1,24 +1,36 @@
-#include "SoundUtil.h"
+#include <cstdio>
+
+#include "ShaderLoader.h"
 #include <GL/freeglut.h>
 #include "ofbx.h"
 
+#include "Audio.h"
+
 void initializeWindow(int argc, char** argv);
+void initializeAssets();
+void unInitializeAssets();
 void display();
 void keyboard(unsigned char key, int x, int y);
 void reshape (int w, int h);
 
+ofbx::IScene* castleScene = nullptr;
+Audio* gameSound = NULL;
+
 int main(int argc, char** argv) {
-    bool running = true;
+   gameSound = new Audio();
 
-    initializeWindow(argc, argv);
-    // initializeSound();
-    // initializeBackgroundMusic();
+   bool running = true;
 
-    do {
-        
-    } while(running);
+   initializeAssets();
+   initializeWindow(argc, argv);
 
-    return 0;
+   do {
+      
+   } while(running);
+
+   unInitializeAssets();
+   delete gameSound;
+   return 0;
 }
 
 void initializeWindow(int argc, char** argv) {
@@ -26,7 +38,7 @@ void initializeWindow(int argc, char** argv) {
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
 
    glutInitWindowSize (1280, 600); 
-//    glutFullScreen();
+   // glutFullScreen();
    glutInitWindowPosition (100, 100);
    glutCreateWindow (argv[0]);
 
@@ -35,6 +47,26 @@ void initializeWindow(int argc, char** argv) {
    glutKeyboardFunc (keyboard);
 
    glutMainLoop();
+}
+
+void initializeAssets() {
+   FILE* castleAssetFile = fopen("assets/box.fbx", "rb");
+   if (!castleAssetFile) {
+      // TODO, uh oh.
+   }
+	fseek(castleAssetFile, 0, SEEK_END);
+	long castleAssetFileSize = ftell(castleAssetFile);
+   fseek(castleAssetFile, 0, SEEK_SET);
+	auto* castleAssetFileContent = new ofbx::u8[castleAssetFileSize];
+	fread(castleAssetFileContent, 1, castleAssetFileSize, castleAssetFile);
+   castleScene = ofbx::load((ofbx::u8*)castleAssetFileContent, castleAssetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+   
+   delete castleAssetFileContent;
+   fclose(castleAssetFile);
+}
+
+void unInitializeAssets() {
+   // delete castleScene;
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -47,7 +79,20 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 void display() {
-   const ofbx::Object* castle = scene.getRoot();
+   // const ofbx::Object* castle = castleScene->getRoot();
+   // GLuint programID = LoadShaders( "shader/vertexShader.glsl", "shader/fragmentShader.glsl");
+
+   // int vertexBuffer;
+   // glGenVertexArrays(1, &vertexBuffer);
+   // glBindVertexArray(vertexBuffer);
+
+   // int buffer;
+   // glGenBuffers(1, &buffer);
+   // glBindBuffer(GL_ARRAY_BUFFER, buffer);
+   // glBufferData(GL_ARRAY_BUFFER, castle.getVertexCount(), castle.getVertices(), GL_STATIC_DRAW);
+   // glClear(GL_COLOR_BUFFER_BIT);
+   // glDrawArrays(GL_POINTS, 0, N);
+   // glFlush();
 
 }
 
