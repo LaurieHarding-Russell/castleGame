@@ -14,9 +14,6 @@ cc_binary(
     ],
     linkopts = [
         "-lGL",
-        # "-lsndfile",
-        # "-lpthread",
-        # "-lasound",
     ],
     data = [
         "@music//file",

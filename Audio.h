@@ -15,30 +15,7 @@ class Audio {
     ALCcontext* context;
     ALCdevice *device = NULL;
 
-    public:
-    void al_nssleep(unsigned long nsec) {
-        struct timespec ts, rem;
-        ts.tv_sec = (time_t)(nsec / 1000000000ul);
-        ts.tv_nsec = (long)(nsec % 1000000000ul);
-        while(nanosleep(&ts, &rem) == -1 && errno == EINTR)
-            ts = rem;
-    }
-
-    Audio() {
-        device = alcOpenDevice(NULL);
-        if (!device) {
-            std::cout << "Sound device failed to load";
-            exit(1);
-        }
-        
-        ALuint error = alGetError();
-        if (error != AL_NO_ERROR) {
-            std::cerr << "Uhh oh... " + error << std::endl;
-            // exit(1);
-        }
-        context = alcCreateContext(device, NULL);
-        alcMakeContextCurrent(context);
-
+    void setupBackgroundMusic() {
         short *decoded;
         int channels, len;
         int sampleRate;
@@ -51,16 +28,38 @@ class Audio {
         alGenSources(1, &alBackgroundMusicSource);
         alGenBuffers(1, &alBackgroundMusicBuffer);
 
+        ALuint format = 0; 
         if(channels == 1) {
-            alBufferData(alBackgroundMusicSource, AL_FORMAT_MONO16, decoded, size*sizeof(short int)*1, 44100);
+            format = AL_FORMAT_MONO16;
         } else if(channels == 2) {
-            alBufferData(alBackgroundMusicBuffer, AL_FORMAT_STEREO16, decoded, size*sizeof(short int)*channels, 44100);
+            format = AL_FORMAT_STEREO16;
         }
 
+        alBufferData(alBackgroundMusicBuffer, format, decoded, size*sizeof(short int)*channels, 44100);
+
         alSourcei(alBackgroundMusicSource, AL_BUFFER, alBackgroundMusicBuffer);
-
+        alSourcef(alBackgroundMusicSource, AL_GAIN, 0.25); // Keeping the background music in the background
+        alSourcei(alBackgroundMusicSource, AL_LOOPING, AL_TRUE);
         alSourcePlay(alBackgroundMusicSource);
+    }
 
+
+    public:
+    Audio() {
+        device = alcOpenDevice(NULL);
+        if (!device) {
+            std::cout << "Sound device failed to load";
+            exit(1);
+        }
+        
+        ALuint error = alGetError();
+        if (error != AL_NO_ERROR) {
+            std::cerr << "Uhh oh... " + error << std::endl;
+        }
+        context = alcCreateContext(device, NULL);
+        alcMakeContextCurrent(context);
+
+        setupBackgroundMusic();
     }
 
 
