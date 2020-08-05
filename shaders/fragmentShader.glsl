@@ -1,6 +1,8 @@
-#version 150
+#version 130
 
-out vec3 color;
+in vec4 colour;
+out vec4 fColor;
+
 void main(){
-  color = vec3(1,0,0);
+	fColor= colour;
 }

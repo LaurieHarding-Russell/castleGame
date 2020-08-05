@@ -1,7 +1,11 @@
-#version 150
+#version 130
 
+in vec2 textureCoordinate;
 in vec4 vertexPosition;
 out vec4 colour;
+
+out vec4 fragmentColour;
+
 
 uniform mat4 ModelView, Projection;
 

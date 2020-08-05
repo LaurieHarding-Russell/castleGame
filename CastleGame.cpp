@@ -35,16 +35,23 @@ int main(int argc, char** argv) {
 
 void initializeWindow(int argc, char** argv) {
    glutInit(&argc, argv);
-   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
+   glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
    glutInitWindowSize (1280, 600); 
    // glutFullScreen();
    glutInitWindowPosition (100, 100);
-   glutCreateWindow (argv[0]);
+   glutCreateWindow("Castle Game");
 
    glutDisplayFunc(display); 
    glutReshapeFunc(reshape);
    glutKeyboardFunc (keyboard);
+
+   glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_DEPTH_TEST);
+
+   glewInit();
+
+   GLuint programID = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
 
    glutMainLoop();
 }
@@ -79,8 +86,7 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 void display() {
-   // const ofbx::Object* castle = castleScene->getRoot();
-   // GLuint programID = LoadShaders( "shader/vertexShader.glsl", "shader/fragmentShader.glsl");
+   const ofbx::Object* castle = castleScene->getRoot();
 
    // int vertexBuffer;
    // glGenVertexArrays(1, &vertexBuffer);

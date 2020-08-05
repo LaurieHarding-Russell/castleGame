@@ -3,7 +3,6 @@ cc_binary(
     srcs = [
         "CastleGame.cpp",
         "Audio.h",
-        "ShaderLoader.h"
     ],
     deps = [
         "@openal-soft//:al",
@@ -11,16 +10,21 @@ cc_binary(
         "@glut//freeglut/freeglut:glut",
         "@OpenFBX//:openFBX",
         ":OggVorbois",
+        ":initShader"
     ],
     linkopts = [
-        "-lGL",
+        "-lGL", 
+        "-lGLU"
     ],
     data = [
         "@music//file",
         "assets/box.fbx",
-        "@glew//:glew",
         "shaders/fragmentShader.glsl",
         "shaders/vertexShader.glsl"
+    ],
+    defines = [ 
+        "DEBUG", 
+        "GL_GLEXT_PROTOTYPES"
     ],
     visibility = ["//visibility:public"]
 )
@@ -37,3 +41,18 @@ cc_library(
     linkstatic = True,
 )
 
+cc_library(
+  name = "initShader",
+  hdrs = ["ShaderLoader.h"],
+  linkopts = [
+    "-lm",
+    "-lGL", 
+    "-lGLEW",
+    "-lglut", 
+    "-lGLU",
+  ],
+#   deps = [
+#     "@glew//:glew",
+#   ],
+  visibility = ["//visibility:public"]
+)

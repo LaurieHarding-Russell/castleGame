@@ -32,9 +32,31 @@ http_archive(
 
 http_archive(
     name = "glew",
-    urls = ["https://github.com/Lunarsong/glew/archive/a38094b249974f219f9c23f54b5b60a620777a13.zip"],
     strip_prefix = "glew-a38094b249974f219f9c23f54b5b60a620777a13",
-    build_file = "glew.BUILD",
+    urls = [
+        "https://github.com/Lunarsong/glew/archive/a38094b249974f219f9c23f54b5b60a620777a13.tar.gz",
+    ],
+    build_file_content = """
+cc_library(
+name = "glew",
+includes = ["include"],
+srcs = [
+    "src/glew.c",
+],
+hdrs = [
+    "include/GL/glew.h",
+    "include/GL/eglew.h",
+    "include/GL/glxew.h",
+    "include/GL/wglew.h",
+
+],
+defines = [
+    "GLEW_STATIC",
+],
+visibility = ["//visibility:public"],
+)
+
+    """
 )
 
 # Asset Loader
