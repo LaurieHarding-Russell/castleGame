@@ -3,6 +3,9 @@ cc_binary(
     srcs = [
         "CastleGame.cpp",
         "Audio.h",
+        "units/Unit.h",
+        "units/Castle.h",
+        "units/Castle.cpp",
     ],
     deps = [
         "@openal-soft//:al",

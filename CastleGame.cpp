@@ -3,8 +3,10 @@
 #include "ShaderLoader.h"
 #include <GL/freeglut.h>
 #include "ofbx.h"
+#include <array>
 
 #include "Audio.h"
+// #include "units/Castle.h"
 
 void initializeWindow(int argc, char** argv);
 void initializeAssets();
@@ -15,8 +17,6 @@ void keyboard(unsigned char key, int x, int y);
 ofbx::IScene* castleScene = nullptr;
 Audio* gameSound = NULL;
 GLuint basicShader;
-
-float camera[16];
 
 int main(int argc, char** argv) {
    gameSound = new Audio();
@@ -46,34 +46,30 @@ void initializeWindow(int argc, char** argv) {
    glewInit();
 
    const ofbx::Geometry* castleGeometry = castleScene->getMesh(0)->getGeometry(); // will move into a objects.
+   GLuint castleVertexBuffer; // FIXME
+   glGenVertexArrays(1, &castleVertexBuffer);
+   glBindVertexArray(castleVertexBuffer);
 
-   float verts[]={
-      // triangle 1
-      -1.0f,-1.0f, 0.0f, 1.0f,						// bottom left
-      -1.0f,1.0f, .0f, 1.0f,						// Top left
-      1.0f,1.0f, .0f, 1.0f,						// top right
-      // triangle 2
-      -1.0f,-1.0f, .0f, 1.0f,						// bottom left
-      1.0f,1.0f, .0f, 1.0f,						// top right
-      1.0f,-1.0f, .0f, 1.0f						// bottom right
-   };
-   
+   GLuint castleBuffer;
+   glGenBuffers(1, &castleBuffer);
+   glBindBuffer(GL_ARRAY_BUFFER, castleBuffer);
+   glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, castleGeometry->getVertexCount(), castleGeometry->getVertices());
+   // Castle::setModelBuffer(castleVertexBuffer);
+
    basicShader = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
    glUseProgram(basicShader);
 
-   GLuint vao; // FIXME
-   glGenVertexArrays(1, &vao);
-   glBindVertexArray(vao);
+   GLuint positionHandle = glGetUniformLocation(basicShader, "position");
 
-   GLuint buffer;
-   glGenBuffers(1, &buffer);
-   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-   // glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), castleGeometry->getVertices(), GL_STATIC_DRAW);
-   glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
-   glBufferSubData(GL_ARRAY_BUFFER, 0, castleGeometry->getVertexCount(), castleGeometry->getVertices());
-
-   // GLuint projectionHandle = glGetUniformLocation(basicShader, "Projection");
-   // glUniformMatrix4dv(projectionHandle, 1, false, camera);
+   GLfloat postition[] = { // FIXME, make a matrix type
+      1.0f, 0.0f, 0.0f, 0.0,
+      0.0f, 1.0f, 0.0f, 0.0,
+      0.0f, 0.0f, 1.0f, 0.0,
+      0.0f, 0.0f, 0.0f, 1.0,
+   };
+   
+   glUniformMatrix4fv(positionHandle, 1, false, postition);
 
    int vectorIn = glGetAttribLocation(basicShader, "vectorIn");
 	glEnableVertexAttribArray(vectorIn);
