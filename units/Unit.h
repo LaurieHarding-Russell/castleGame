@@ -6,15 +6,21 @@
 #include <string>
 
 class Unit {
+    private:
+    GLuint modelBuffer;
+    GLuint modelNumberOfTraingles;
+    int team;
+    
     protected:
-    std::array<float,4> position;
-    std::array<float,4> velocity;
+    std::array<GLfloat,4> position;
+    
+    std::array<GLfloat,4> velocity;
 
-    float x() { return position[0]; }
-    float y() { return position[1]; }
-    float z() { return position[2]; }
+    GLfloat x() { return position[0]; }
+    GLfloat y() { return position[1]; }
+    GLfloat z() { return position[2]; }
 
-    Unit(std::array<float,3> position) {
+    Unit(std::array<GLfloat,3> position) {
         this->position[0] = position[0];
         this->position[1] = position[1];
         this->position[2] = position[2];
@@ -22,6 +28,22 @@ class Unit {
     }
 
     public:
+    GLuint getModelBuffer() {
+        return modelBuffer;
+    }
+
+    void setModelBuffer(GLuint modelBuffer) {
+        this->modelBuffer = modelBuffer;
+    }
+
+    int getModelNumberOfTraingles() {
+        return modelNumberOfTraingles;
+    }
+
+    void setModelNumberOfTraingles(int numberOfTraingles) {
+        this->modelNumberOfTraingles = numberOfTraingles;
+    }
+
     std::array<float,4> getPosition() {
         return position;
     }
@@ -50,6 +72,9 @@ class Unit {
         return positionMatrix;
     }
 
+    void setTeam(int team) {
+        this->team = team;
+    }
 };
 
 #endif

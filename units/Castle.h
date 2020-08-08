@@ -7,16 +7,14 @@ class Castle : public Unit {
     private:
 
     public:
-    Castle(std::array<float,3> position);
+    Castle(std::array<GLfloat,3> position);
     ~Castle();
 
 
     // FIXME think about this.
-    static std::string getModelFileName() {
+    static char* getModelFileName() {
         return "assets/box.fbx";
     }
-
-    static GLuint modelBuffer;
 
 };
 

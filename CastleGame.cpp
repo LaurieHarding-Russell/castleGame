@@ -4,38 +4,39 @@
 #include <GL/freeglut.h>
 #include "ofbx.h"
 #include <array>
+#include <vector>
 
 #include "Audio.h"
-// #include "units/Castle.h"
+#include "units/Castle.h"
 
-void initializeWindow(int argc, char** argv);
+void initialize(int argc, char** argv);
 void initializeAssets();
-void unInitializeAssets();
+GLuint loadAsset(char* fileName);
+void unInitializeAssets(); 
 void display();
 void keyboard(unsigned char key, int x, int y);
+void initializeGame();
 
-ofbx::IScene* castleScene = nullptr;
 Audio* gameSound = NULL;
 GLuint basicShader;
+
+int vectorIn;
+
+GLuint castleVertexBuffer = 0;
+std::vector<Unit> units;
 
 int main(int argc, char** argv) {
    gameSound = new Audio();
 
-   bool running = true;
+   initialize(argc, argv);
 
-   initializeAssets();
-   initializeWindow(argc, argv);
-
-   do {
-      
-   } while(running);
-
-   unInitializeAssets();
-   delete gameSound;
+   // FIXME, probably should uninitialize things.. I know OS does it for me.
+   // unInitializeAssets();
+   // delete gameSound;
    return 0;
 }
 
-void initializeWindow(int argc, char** argv) {
+void initialize(int argc, char** argv) {
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
@@ -44,18 +45,6 @@ void initializeWindow(int argc, char** argv) {
    glutInitWindowPosition (100, 100);
    glutCreateWindow("Castle Game");
    glewInit();
-
-   const ofbx::Geometry* castleGeometry = castleScene->getMesh(0)->getGeometry(); // will move into a objects.
-   GLuint castleVertexBuffer; // FIXME
-   glGenVertexArrays(1, &castleVertexBuffer);
-   glBindVertexArray(castleVertexBuffer);
-
-   GLuint castleBuffer;
-   glGenBuffers(1, &castleBuffer);
-   glBindBuffer(GL_ARRAY_BUFFER, castleBuffer);
-   glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
-   glBufferSubData(GL_ARRAY_BUFFER, 0, castleGeometry->getVertexCount(), castleGeometry->getVertices());
-   // Castle::setModelBuffer(castleVertexBuffer);
 
    basicShader = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
    glUseProgram(basicShader);
@@ -71,7 +60,11 @@ void initializeWindow(int argc, char** argv) {
    
    glUniformMatrix4fv(positionHandle, 1, false, postition);
 
-   int vectorIn = glGetAttribLocation(basicShader, "vectorIn");
+   // FIXME, probably should have a splash screen
+   initializeAssets();
+   initializeGame();
+
+   vectorIn = glGetAttribLocation(basicShader, "vectorIn");
 	glEnableVertexAttribArray(vectorIn);
 	glVertexAttribPointer(vectorIn, 3, GL_FLOAT, GL_FALSE, 0, 0);
    
@@ -83,19 +76,35 @@ void initializeWindow(int argc, char** argv) {
 }
 
 void initializeAssets() {
-   FILE* castleAssetFile = fopen("assets/box.fbx", "rb");
-   if (!castleAssetFile) {
+   castleVertexBuffer = loadAsset(Castle::getModelFileName());
+}
+
+GLuint loadAsset(char* fileName) {
+   FILE* assetFile = fopen(fileName, "rb");
+   if (!assetFile) {
       // TODO, uh oh.
    }
-	fseek(castleAssetFile, 0, SEEK_END);
-	long castleAssetFileSize = ftell(castleAssetFile);
-   fseek(castleAssetFile, 0, SEEK_SET);
-	ofbx::u8* castleAssetFileContent = new ofbx::u8[castleAssetFileSize];
-	fread(castleAssetFileContent, 1, castleAssetFileSize, castleAssetFile);
-   castleScene = ofbx::load((ofbx::u8*)castleAssetFileContent, castleAssetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+	fseek(assetFile, 0, SEEK_END);
+	long assetFileSize = ftell(assetFile);
+   fseek(assetFile, 0, SEEK_SET);
+	ofbx::u8* assetFileContent = new ofbx::u8[assetFileSize];
+	fread(assetFileContent, 1, assetFileSize, assetFile);
+   ofbx::IScene* assetScene = ofbx::load((ofbx::u8*)assetFileContent, assetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
    
-   delete castleAssetFileContent;
-   fclose(castleAssetFile);
+   delete assetFileContent;
+   fclose(assetFile);
+
+   const ofbx::Geometry* assetGeometry = assetScene->getMesh(0)->getGeometry(); // will move into a objects.
+   GLuint vertexBuffer;
+   glGenVertexArrays(1, &vertexBuffer);
+   glBindVertexArray(vertexBuffer);
+
+   GLuint assetBuffer;
+   glGenBuffers(1, &assetBuffer);
+   glBindBuffer(GL_ARRAY_BUFFER, assetBuffer);
+   glBufferData(GL_ARRAY_BUFFER, assetGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, assetGeometry->getVertexCount(), assetGeometry->getVertices());
+   return vertexBuffer;
 }
 
 void unInitializeAssets() {
@@ -115,7 +124,27 @@ void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
 
-   glDrawArrays(GL_TRIANGLES, 0 ,6);
+   for (int i = 0; i != units.size(); i++) {
+      glBindVertexArray(units[i].getModelBuffer());
+      glDrawArrays(GL_TRIANGLES, 0 ,units[i].getModelNumberOfTraingles());
+   }
+
    glutSwapBuffers();
 
+}
+
+void initializeGame() {
+   std::array<GLfloat,3> playerOneCastleStartPostition = {1.0, 1.0, 1.0};
+   std::array<GLfloat,3> playerTwoCastleStartPostition = {-1.0, 1.0, 1.0};
+   
+   Castle playerOne = Castle(playerOneCastleStartPostition);
+   playerOne.setTeam(0);
+   playerOne.setModelBuffer(castleVertexBuffer);
+
+   Castle playerTwo = Castle(playerTwoCastleStartPostition);
+   playerTwo.setTeam(1);
+   playerTwo.setModelBuffer(castleVertexBuffer);
+   
+   units.push_back(playerOne);
+   units.push_back(playerTwo);
 }
