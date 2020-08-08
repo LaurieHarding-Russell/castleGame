@@ -11,10 +11,12 @@ void initializeAssets();
 void unInitializeAssets();
 void display();
 void keyboard(unsigned char key, int x, int y);
-void reshape (int w, int h);
 
 ofbx::IScene* castleScene = nullptr;
 Audio* gameSound = NULL;
+GLuint basicShader;
+
+float camera[16];
 
 int main(int argc, char** argv) {
    gameSound = new Audio();
@@ -41,18 +43,46 @@ void initializeWindow(int argc, char** argv) {
    // glutFullScreen();
    glutInitWindowPosition (100, 100);
    glutCreateWindow("Castle Game");
-
-   glutDisplayFunc(display); 
-   glutReshapeFunc(reshape);
-   glutKeyboardFunc (keyboard);
-
-   glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_DEPTH_TEST);
-
    glewInit();
 
-   GLuint programID = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+   const ofbx::Geometry* castleGeometry = castleScene->getMesh(0)->getGeometry(); // will move into a objects.
 
+   float verts[]={
+      // triangle 1
+      -1.0f,-1.0f, 0.0f, 1.0f,						// bottom left
+      -1.0f,1.0f, .0f, 1.0f,						// Top left
+      1.0f,1.0f, .0f, 1.0f,						// top right
+      // triangle 2
+      -1.0f,-1.0f, .0f, 1.0f,						// bottom left
+      1.0f,1.0f, .0f, 1.0f,						// top right
+      1.0f,-1.0f, .0f, 1.0f						// bottom right
+   };
+   
+   basicShader = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
+   glUseProgram(basicShader);
+
+   GLuint vao; // FIXME
+   glGenVertexArrays(1, &vao);
+   glBindVertexArray(vao);
+
+   GLuint buffer;
+   glGenBuffers(1, &buffer);
+   glBindBuffer(GL_ARRAY_BUFFER, buffer);
+   // glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), castleGeometry->getVertices(), GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, castleGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, castleGeometry->getVertexCount(), castleGeometry->getVertices());
+
+   // GLuint projectionHandle = glGetUniformLocation(basicShader, "Projection");
+   // glUniformMatrix4dv(projectionHandle, 1, false, camera);
+
+   int vectorIn = glGetAttribLocation(basicShader, "vectorIn");
+	glEnableVertexAttribArray(vectorIn);
+	glVertexAttribPointer(vectorIn, 3, GL_FLOAT, GL_FALSE, 0, 0);
+   
+	glEnable(GL_DEPTH_TEST);
+
+   glutDisplayFunc(display); 
+   glutKeyboardFunc (keyboard);
    glutMainLoop();
 }
 
@@ -64,7 +94,7 @@ void initializeAssets() {
 	fseek(castleAssetFile, 0, SEEK_END);
 	long castleAssetFileSize = ftell(castleAssetFile);
    fseek(castleAssetFile, 0, SEEK_SET);
-	auto* castleAssetFileContent = new ofbx::u8[castleAssetFileSize];
+	ofbx::u8* castleAssetFileContent = new ofbx::u8[castleAssetFileSize];
 	fread(castleAssetFileContent, 1, castleAssetFileSize, castleAssetFile);
    castleScene = ofbx::load((ofbx::u8*)castleAssetFileContent, castleAssetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
    
@@ -86,22 +116,10 @@ void keyboard(unsigned char key, int x, int y)
 }
 
 void display() {
-   const ofbx::Object* castle = castleScene->getRoot();
+   
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
 
-   // int vertexBuffer;
-   // glGenVertexArrays(1, &vertexBuffer);
-   // glBindVertexArray(vertexBuffer);
+   glDrawArrays(GL_TRIANGLES, 0 ,6);
+   glutSwapBuffers();
 
-   // int buffer;
-   // glGenBuffers(1, &buffer);
-   // glBindBuffer(GL_ARRAY_BUFFER, buffer);
-   // glBufferData(GL_ARRAY_BUFFER, castle.getVertexCount(), castle.getVertices(), GL_STATIC_DRAW);
-   // glClear(GL_COLOR_BUFFER_BIT);
-   // glDrawArrays(GL_POINTS, 0, N);
-   // glFlush();
-
-}
-
-void reshape (int w, int h) {
-   glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 }

@@ -1,15 +1,10 @@
 #version 130
 
-in vec2 textureCoordinate;
-in vec4 vertexPosition;
-out vec4 colour;
 
+in vec3 vectorIn;
 out vec4 fragmentColour;
 
-
-uniform mat4 ModelView, Projection;
-
 void main() {
-    gl_Position = Projection * ModelView * vertexPosition;
+    gl_Position = vec4(vectorIn, 1.0);
     fragmentColour = vec4(1,1,1,1);
 }

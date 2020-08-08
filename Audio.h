@@ -17,7 +17,7 @@ class Audio {
 
     void setupBackgroundMusic() {
         short *decoded;
-        int channels, len;
+        int channels;
         int sampleRate;
 
         int size;
