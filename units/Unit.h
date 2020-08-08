@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <array>
 #include <string>
+#include <iostream>
 
 class Unit {
     private:
@@ -13,7 +14,13 @@ class Unit {
     
     protected:
     std::array<GLfloat,4> position;
-    
+    GLfloat positionMatrix[16] = { // FIXME, make a matrix type
+      1.0f, 0.0f, 0.0f, 0.0,
+      0.0f, 1.0f, 0.0f, 0.0,
+      0.0f, 0.0f, 1.0f, 0.0,
+      0.0f, 0.0f, 0.0f, 1.0,
+   };
+
     std::array<GLfloat,4> velocity;
 
     GLfloat x() { return position[0]; }
@@ -63,18 +70,37 @@ class Unit {
     }
 
     virtual GLfloat* getPositionMatrix() {
-        GLfloat positionMatrix[] = { // FIXME, make a matrix type
-            position[0], 0.0f, 0.0f, 0.0,
-            0.0f, position[1], 0.0f, 0.0,
-            0.0f, 0.0f, position[2], 0.0,
-            0.0f, 0.0f, 0.0f, position[3],
-        };
+        positionMatrix[0] = position[0];
+        positionMatrix[5] = position[1];
+        positionMatrix[10] = position[2];
+        positionMatrix[15] = position[3];
         return positionMatrix;
     }
 
     void setTeam(int team) {
         this->team = team;
     }
+
+    #ifdef DEBUG
+    void debugInfo() {
+        std::cout << "info\n";
+        // pos mat
+        std::cout << "x: " <<  position[0] << std::endl;
+        std::cout << "y: " <<  position[0] << std::endl;
+        std::cout << "z: " <<  position[0] << std::endl;
+        std::cout << "s: " <<  position[0] << std::endl;
+        std::cout<<"\n";
+        GLfloat* mat = getPositionMatrix();
+        std::cout<<"Pos Mat \n";
+        for (int i = 0; i != 4; i++) {
+            std::cout << "[ ";
+            for (int j = 0; j != 4; j++) {
+                std::cout <<  mat[i*4 + j] << ",";
+            }
+            std::cout << " ]\n";
+        }
+    }
+    #endif
 };
 
 #endif

@@ -19,6 +19,7 @@ void initializeGame();
 
 Audio* gameSound = NULL;
 GLuint basicShader;
+GLuint positionHandle;
 
 int vectorIn;
 
@@ -126,6 +127,8 @@ void display() {
 
    for (int i = 0; i != units.size(); i++) {
       glBindVertexArray(units[i].getModelBuffer());
+      units[i].getPositionMatrix();
+      glUniformMatrix4fv(positionHandle, 1, false, units[i].getPositionMatrix());
       glDrawArrays(GL_TRIANGLES, 0 ,units[i].getModelNumberOfTraingles());
    }
 
