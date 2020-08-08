@@ -2,10 +2,13 @@
 
 
 in vec3 vectorIn;
-uniform mat4 position;
 out vec4 fragmentColour;
 
+uniform mat4 position;
+uniform mat4 projection;
+uniform vec4 colour;
+
 void main() {
-    gl_Position = position * vec4(vectorIn, 1.0);
-    fragmentColour = vec4(1,1,1,1);
+    gl_Position = projection * position * vec4(vectorIn, 1.0);
+    fragmentColour = colour;
 }

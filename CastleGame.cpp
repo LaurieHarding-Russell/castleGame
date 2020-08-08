@@ -20,11 +20,29 @@ void initializeGame();
 Audio* gameSound = NULL;
 GLuint basicShader;
 GLuint positionHandle;
+GLuint colourHandle;
 
 int vectorIn;
 
 GLuint castleVertexBuffer = 0;
 std::vector<Unit> units;
+
+GLfloat postition[16] = { // FIXME, make a matrix type
+   1.0f, 0.0f, 0.0f, 0.0,
+   0.0f, 1.0f, 0.0f, 0.0,
+   0.0f, 0.0f, 1.0f, 0.0,
+   0.0f, 0.0f, 0.0f, 1.0,
+};
+
+GLfloat orthographicProjection[16] = { // FIXME, make a matrix type
+   1.0f, 0.0f, 0.0f, 0.0,
+   0.0f, 1.0f, 0.0f, 0.0,
+   0.0f, 0.0f, 0.0f, 0.0,
+   0.0f, 0.0f, 0.0f, 1.0,
+};
+
+GLfloat teamOneColour[4] = {0.0f, 0.0f, 1.0f, 1.0};
+GLfloat teamTwoColour[4] = {1.0f, 0.0f, 0.0f, 1.0};
 
 int main(int argc, char** argv) {
    gameSound = new Audio();
@@ -50,16 +68,14 @@ void initialize(int argc, char** argv) {
    basicShader = initShader( "shaders/vertexShader.glsl", "shaders/fragmentShader.glsl");
    glUseProgram(basicShader);
 
-   GLuint positionHandle = glGetUniformLocation(basicShader, "position");
-
-   GLfloat postition[] = { // FIXME, make a matrix type
-      1.0f, 0.0f, 0.0f, 0.0,
-      0.0f, 1.0f, 0.0f, 0.0,
-      0.0f, 0.0f, 1.0f, 0.0,
-      0.0f, 0.0f, 0.0f, 1.0,
-   };
-   
+   positionHandle = glGetUniformLocation(basicShader, "position");   
    glUniformMatrix4fv(positionHandle, 1, false, postition);
+
+   GLuint projectionHandle = glGetUniformLocation(basicShader, "projection");   
+   glUniformMatrix4fv(projectionHandle, 1, false, orthographicProjection);
+
+   colourHandle = glGetUniformLocation(basicShader, "colour");
+   glUniform4fv(colourHandle, 1, teamOneColour);
 
    // FIXME, probably should have a splash screen
    initializeAssets();
@@ -125,10 +141,15 @@ void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
 
-   for (int i = 0; i != units.size(); i++) {
+   for (uint i = 0; i != units.size(); i++) {
       glBindVertexArray(units[i].getModelBuffer());
       units[i].getPositionMatrix();
       glUniformMatrix4fv(positionHandle, 1, false, units[i].getPositionMatrix());
+      if (units[i].getTeam() == 0) {
+         glUniform4fv(colourHandle, 1, teamOneColour);
+      } else {
+         glUniform4fv(colourHandle, 1, teamTwoColour);
+      }
       glDrawArrays(GL_TRIANGLES, 0 ,units[i].getModelNumberOfTraingles());
    }
 

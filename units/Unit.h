@@ -81,6 +81,10 @@ class Unit {
         this->team = team;
     }
 
+    int getTeam() {
+        return team;
+    }
+
     #ifdef DEBUG
     void debugInfo() {
         std::cout << "info\n";
