@@ -38,11 +38,19 @@ GLfloat postition[4] = { // FIXME, make a matrix type
 };
 
 // FIXME, think about projections
+// OpenGL clips between 1.0 and -1.0 for the different axis.
+float right = 20;
+float left = -20;
+float top = 10;
+float bottom = -10;
+float far = -10;
+float near = 10;
+
 GLfloat projection[16] = { // FIXME, make a matrix type
-   1.0f, 0.0f, 0.0f, 0.0,
-   0.0f, 1.0f, 0.0f, 0.0,
-   0.0f, 0.0f, 1.0f, 0.0,
-   0.0f, 0.0f, 0.0f, 1.0,
+   2.0f/(right-left),   0.0f,             0.0f,             -(right+left)/(right-left),
+   0.0f,                2.0f/(top-bottom),0.0f,             -(top + bottom)/(top-bottom),
+   0.0f,                0.0f,             -2.0f/(far-near), -(far + near)/(far-near),
+   0.0f,                0.0f,             0.0f,             1.0f,
 };
 
 GLfloat teamOneColour[4] = {0.0f, 0.0f, 1.0f, 1.0};
@@ -59,7 +67,7 @@ void initialize(int argc, char** argv) {
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
-   glutInitWindowSize (1280, 600); 
+   glutInitWindowSize (1200, 600); 
    // glutFullScreen();
    glutInitWindowPosition (100, 100);
    glutCreateWindow("Castle Game");
@@ -181,8 +189,8 @@ void display() {
 }
 
 void initializeGame() {
-   Vector3 playerOneCastleStartPostition = Vector3(-1.0, 1.0, -1.0);
-   Vector3 playerTwoCastleStartPostition = Vector3(1.0, 1.0, -1.0);
+   Vector3 playerOneCastleStartPostition = Vector3(left, 0.0, 0.0);
+   Vector3 playerTwoCastleStartPostition = Vector3(right, 0.0, 0.0);
    
    Castle playerOne = Castle(playerOneCastleStartPostition);
    playerOne.setTeam(0);
