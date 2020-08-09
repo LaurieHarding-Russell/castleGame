@@ -8,19 +8,20 @@
 
 #include "Audio.h"
 #include "units/Castle.h"
-
-struct VertexBufferInfo {
-   GLuint vertexBuffer;
-   int vertexCount;
-};
+#include "CommonTypes.h"
 
 void initialize(int argc, char** argv);
 void initializeAssets();
 VertexBufferInfo loadAsset(char* fileName);
 void unInitializeAssets(); 
+ofbx::IScene* loadFbx(char* fileName);
 void display();
 void keyboard(unsigned char key, int x, int y);
 void initializeGame();
+
+void buyPeasant();
+void buySwordsmen();
+void buyArcher();
 
 Audio* gameSound = NULL;
 GLuint basicShader;
@@ -32,17 +33,15 @@ int vectorIn;
 VertexBufferInfo castleVertexBuffer;
 std::vector<Unit> units;
 
-GLfloat postition[16] = { // FIXME, make a matrix type
+GLfloat postition[4] = { // FIXME, make a matrix type
+   0.0f, 0.0f, 0.0f, 0.0,
+};
+
+// FIXME, think about projections
+GLfloat projection[16] = { // FIXME, make a matrix type
    1.0f, 0.0f, 0.0f, 0.0,
    0.0f, 1.0f, 0.0f, 0.0,
    0.0f, 0.0f, 1.0f, 0.0,
-   0.0f, 0.0f, 0.0f, 1.0,
-};
-
-GLfloat orthographicProjection[16] = { // FIXME, make a matrix type
-   1.0f, 0.0f, 0.0f, 0.0,
-   0.0f, 1.0f, 0.0f, 0.0,
-   0.0f, 0.0f, 0.0f, 0.0,
    0.0f, 0.0f, 0.0f, 1.0,
 };
 
@@ -53,10 +52,6 @@ int main(int argc, char** argv) {
    gameSound = new Audio();
 
    initialize(argc, argv);
-
-   // FIXME, probably should uninitialize things.. I know OS does it for me.
-   // unInitializeAssets();
-   // delete gameSound;
    return 0;
 }
 
@@ -74,10 +69,10 @@ void initialize(int argc, char** argv) {
    glUseProgram(basicShader);
 
    positionHandle = glGetUniformLocation(basicShader, "position");   
-   glUniformMatrix4fv(positionHandle, 1, false, postition);
+   glUniform4fv(positionHandle, 1, postition);
 
    GLuint projectionHandle = glGetUniformLocation(basicShader, "projection");   
-   glUniformMatrix4fv(projectionHandle, 1, false, orthographicProjection);
+   glUniformMatrix4fv(projectionHandle, 1, false, projection);
 
    colourHandle = glGetUniformLocation(basicShader, "colour");
    glUniform4fv(colourHandle, 1, teamOneColour);
@@ -102,19 +97,7 @@ void initializeAssets() {
 }
 
 VertexBufferInfo loadAsset(char* fileName) {
-   FILE* assetFile = fopen(fileName, "rb");
-   if (!assetFile) {
-      // TODO, uh oh.
-   }
-	fseek(assetFile, 0, SEEK_END);
-	long assetFileSize = ftell(assetFile);
-   fseek(assetFile, 0, SEEK_SET);
-	ofbx::u8* assetFileContent = new ofbx::u8[assetFileSize];
-	fread(assetFileContent, 1, assetFileSize, assetFile);
-   ofbx::IScene* assetScene = ofbx::load((ofbx::u8*)assetFileContent, assetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
-   
-   delete assetFileContent;
-   fclose(assetFile);
+   ofbx::IScene* assetScene = loadFbx(fileName);
 
    const ofbx::Geometry* assetGeometry = assetScene->getMesh(0)->getGeometry(); // will move into a objects.
    GLuint vertexBuffer;
@@ -132,27 +115,59 @@ VertexBufferInfo loadAsset(char* fileName) {
    return vertexBufferInfo;
 }
 
-void unInitializeAssets() {
-   // delete castleScene;
+ofbx::IScene* loadFbx(char* fileName) {
+   FILE* assetFile = fopen(fileName, "rb");
+   if (!assetFile) {
+      // TODO, uh oh.
+   }
+	fseek(assetFile, 0, SEEK_END);
+	long assetFileSize = ftell(assetFile);
+   fseek(assetFile, 0, SEEK_SET);
+	ofbx::u8* assetFileContent = new ofbx::u8[assetFileSize];
+	fread(assetFileContent, 1, assetFileSize, assetFile);
+   ofbx::IScene* assetScene = ofbx::load((ofbx::u8*)assetFileContent, assetFileSize, (ofbx::u64)ofbx::LoadFlags::TRIANGULATE);
+   
+   delete assetFileContent;
+   fclose(assetFile);
+   return assetScene;
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
+void unInitializeAssets() {
+   // delete castleScene;
+   delete gameSound;
+}
+
+void keyboard(unsigned char key, int x, int y) {
    switch (key) {
       case 27:
+         unInitializeAssets();
          exit(0);
          break;
+
+      case 1:
+         buyPeasant();
+         break;
+      case 2:
+         buySwordsmen();
+         break;
+      case 3:
+         buyArcher();
+         break;
+
+      #ifdef DEBUG
+      default:
+         std::cout<< "key pressed: "  << key << "\n\n";
+      #endif
    }
 }
 
 void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
-
    for (uint i = 0; i != units.size(); i++) {
       glBindVertexArray(units[i].getModelBuffer());
-      units[i].getPositionMatrix();
-      glUniformMatrix4fv(positionHandle, 1, false, units[i].getPositionMatrix());
+      units[i].debugInfo();
+      glUniform4fv(positionHandle, 1, units[i].getPosition());
       if (units[i].getTeam() == 0) {
          glUniform4fv(colourHandle, 1, teamOneColour);
       } else {
@@ -166,8 +181,8 @@ void display() {
 }
 
 void initializeGame() {
-   std::array<GLfloat,3> playerOneCastleStartPostition = {1.0, 1.0, 1.0};
-   std::array<GLfloat,3> playerTwoCastleStartPostition = {-1.0, 1.0, 1.0};
+   Vector3 playerOneCastleStartPostition = Vector3(-1.0, 1.0, -1.0);
+   Vector3 playerTwoCastleStartPostition = Vector3(1.0, 1.0, -1.0);
    
    Castle playerOne = Castle(playerOneCastleStartPostition);
    playerOne.setTeam(0);
@@ -181,4 +196,16 @@ void initializeGame() {
 
    units.push_back(playerOne);
    units.push_back(playerTwo);
+}
+
+void buyPeasant() {
+
+}
+
+void buySwordsmen() {
+
+}
+
+void buyArcher() {
+   
 }

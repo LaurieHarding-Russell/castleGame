@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <iostream>
+#include "CommonTypes.h"
 
 class Unit {
     private:
@@ -13,13 +14,7 @@ class Unit {
     int team;
     
     protected:
-    std::array<GLfloat,4> position;
-    GLfloat positionMatrix[16] = { // FIXME, make a matrix type
-      1.0f, 0.0f, 0.0f, 0.0,
-      0.0f, 1.0f, 0.0f, 0.0,
-      0.0f, 0.0f, 1.0f, 0.0,
-      0.0f, 0.0f, 0.0f, 1.0,
-   };
+    GLfloat position[4];
 
     std::array<GLfloat,4> velocity;
 
@@ -27,10 +22,10 @@ class Unit {
     GLfloat y() { return position[1]; }
     GLfloat z() { return position[2]; }
 
-    Unit(std::array<GLfloat,3> position) {
-        this->position[0] = position[0];
-        this->position[1] = position[1];
-        this->position[2] = position[2];
+    Unit(Vector3 position) {
+        this->position[0] = position.x;
+        this->position[1] = position.y;
+        this->position[2] = position.z;
         this->position[3] = 1.0;
     }
 
@@ -51,7 +46,7 @@ class Unit {
         this->modelNumberOfTraingles = numberOfTraingles;
     }
 
-    std::array<float,4> getPosition() {
+    float* getPosition() {
         return position;
     }
 
@@ -69,14 +64,6 @@ class Unit {
         // velocity[1] += velocity[1];
     }
 
-    virtual GLfloat* getPositionMatrix() {
-        positionMatrix[0] = position[0];
-        positionMatrix[5] = position[1];
-        positionMatrix[10] = position[2];
-        positionMatrix[15] = position[3];
-        return positionMatrix;
-    }
-
     void setTeam(int team) {
         this->team = team;
     }
@@ -90,19 +77,11 @@ class Unit {
         std::cout << "info\n";
         // pos mat
         std::cout << "x: " <<  position[0] << std::endl;
-        std::cout << "y: " <<  position[0] << std::endl;
-        std::cout << "z: " <<  position[0] << std::endl;
-        std::cout << "s: " <<  position[0] << std::endl;
+        std::cout << "y: " <<  position[1] << std::endl;
+        std::cout << "z: " <<  position[2] << std::endl;
+        std::cout << "s: " <<  position[3] << std::endl;
         std::cout<<"\n";
-        GLfloat* mat = getPositionMatrix();
-        std::cout<<"Pos Mat \n";
-        for (int i = 0; i != 4; i++) {
-            std::cout << "[ ";
-            for (int j = 0; j != 4; j++) {
-                std::cout <<  mat[i*4 + j] << ",";
-            }
-            std::cout << " ]\n";
-        }
+        std::cout << "TEAM! " << team << std::endl; 
     }
     #endif
 };

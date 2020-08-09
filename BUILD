@@ -6,6 +6,7 @@ cc_binary(
         "units/Unit.h",
         "units/Castle.h",
         "units/Castle.cpp",
+        "CommonTypes.h",
     ],
     deps = [
         "@openal-soft//:al",

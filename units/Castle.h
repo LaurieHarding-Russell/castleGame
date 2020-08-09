@@ -7,7 +7,7 @@ class Castle : public Unit {
     private:
 
     public:
-    Castle(std::array<GLfloat,3> position);
+    Castle(Vector3 position);
     ~Castle();
 
 
