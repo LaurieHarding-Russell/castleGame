@@ -18,8 +18,7 @@ cc_binary(
         ":initShader"
     ],
     linkopts = [
-        "-lGL", 
-        "-lGLU"
+        "-lGL",
     ],
     data = [
         "@music//file",
@@ -50,14 +49,10 @@ cc_library(
   name = "initShader",
   hdrs = ["ShaderLoader.h"],
   linkopts = [
-    "-lm",
     "-lGL", 
-    "-lGLEW",
-    "-lglut", 
-    "-lGLU",
   ],
-#   deps = [
-#     "@glew//:glew",
-#   ],
+  deps = [
+    "@glew//:glew",
+  ],
   visibility = ["//visibility:public"]
 )

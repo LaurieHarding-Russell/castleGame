@@ -84,9 +84,13 @@ Audio::Audio() {
 }
 
 Audio::~Audio() {
-    alSourceStopv(1, &alSoundFailInfo.source);		// new line
-	alDeleteSources(1, &alSoundFailInfo.source); // new line
-	alDeleteBuffers(1, &alSoundFailInfo.buffer); // new line
+    alSourceStopv(1, &alSoundFailInfo.source);
+	alDeleteSources(1, &alSoundFailInfo.source);
+	alDeleteBuffers(1, &alSoundFailInfo.buffer);
+
+    alSourceStopv(1, &alSoundSuccessInfo.source);
+	alDeleteSources(1, &alSoundSuccessInfo.source);
+	alDeleteBuffers(1, &alSoundSuccessInfo.buffer);
 
     alSourceStop(alBackgroundMusicInfo.source);
     alDeleteSources(1, &alBackgroundMusicInfo.source);
