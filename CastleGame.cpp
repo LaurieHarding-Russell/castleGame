@@ -9,9 +9,14 @@
 #include "Audio.h"
 #include "units/Castle.h"
 
+struct VertexBufferInfo {
+   GLuint vertexBuffer;
+   int vertexCount;
+};
+
 void initialize(int argc, char** argv);
 void initializeAssets();
-GLuint loadAsset(char* fileName);
+VertexBufferInfo loadAsset(char* fileName);
 void unInitializeAssets(); 
 void display();
 void keyboard(unsigned char key, int x, int y);
@@ -24,7 +29,7 @@ GLuint colourHandle;
 
 int vectorIn;
 
-GLuint castleVertexBuffer = 0;
+VertexBufferInfo castleVertexBuffer;
 std::vector<Unit> units;
 
 GLfloat postition[16] = { // FIXME, make a matrix type
@@ -96,7 +101,7 @@ void initializeAssets() {
    castleVertexBuffer = loadAsset(Castle::getModelFileName());
 }
 
-GLuint loadAsset(char* fileName) {
+VertexBufferInfo loadAsset(char* fileName) {
    FILE* assetFile = fopen(fileName, "rb");
    if (!assetFile) {
       // TODO, uh oh.
@@ -121,7 +126,10 @@ GLuint loadAsset(char* fileName) {
    glBindBuffer(GL_ARRAY_BUFFER, assetBuffer);
    glBufferData(GL_ARRAY_BUFFER, assetGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER, 0, assetGeometry->getVertexCount(), assetGeometry->getVertices());
-   return vertexBuffer;
+   VertexBufferInfo vertexBufferInfo;
+   vertexBufferInfo.vertexBuffer = vertexBuffer;
+   vertexBufferInfo.vertexCount = assetGeometry->getVertexCount();
+   return vertexBufferInfo;
 }
 
 void unInitializeAssets() {
@@ -163,12 +171,14 @@ void initializeGame() {
    
    Castle playerOne = Castle(playerOneCastleStartPostition);
    playerOne.setTeam(0);
-   playerOne.setModelBuffer(castleVertexBuffer);
+   playerOne.setModelBuffer(castleVertexBuffer.vertexBuffer);
+   playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
 
    Castle playerTwo = Castle(playerTwoCastleStartPostition);
    playerTwo.setTeam(1);
-   playerTwo.setModelBuffer(castleVertexBuffer);
-   
+   playerTwo.setModelBuffer(castleVertexBuffer.vertexBuffer);
+   playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
+
    units.push_back(playerOne);
    units.push_back(playerTwo);
 }
