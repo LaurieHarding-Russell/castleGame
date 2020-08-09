@@ -39,6 +39,8 @@ GLfloat postition[4] = { // FIXME, make a matrix type
 
 // FIXME, think about projections
 // OpenGL clips between 1.0 and -1.0 for the different axis.
+int sizeX = 1200;
+int sizeY = 600;
 float right = 20;
 float left = -20;
 float top = 10;
@@ -47,9 +49,9 @@ float far = -10;
 float near = 10;
 
 GLfloat projection[16] = { // FIXME, make a matrix type
-   2.0f/(right-left),   0.0f,             0.0f,             -(right+left)/(right-left),
-   0.0f,                2.0f/(top-bottom),0.0f,             -(top + bottom)/(top-bottom),
-   0.0f,                0.0f,             -2.0f/(far-near), -(far + near)/(far-near),
+   2.0f/(right-left),   0.0f,             0.0f,             -((right+left)/(right-left)),
+   0.0f,                2.0f/(top-bottom),0.0f,             -((top + bottom)/(top-bottom)),
+   0.0f,                0.0f,             -2.0f/(far-near), -((far + near)/(far-near)),
    0.0f,                0.0f,             0.0f,             1.0f,
 };
 
@@ -67,7 +69,7 @@ void initialize(int argc, char** argv) {
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
-   glutInitWindowSize (1200, 600); 
+   glutInitWindowSize (sizeX, sizeY); 
    // glutFullScreen();
    glutInitWindowPosition (100, 100);
    glutCreateWindow("Castle Game");
@@ -152,13 +154,13 @@ void keyboard(unsigned char key, int x, int y) {
          exit(0);
          break;
 
-      case 1:
+      case '1':
          buyPeasant();
          break;
-      case 2:
+      case '2':
          buySwordsmen();
          break;
-      case 3:
+      case '3':
          buyArcher();
          break;
 
@@ -174,7 +176,7 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
    for (uint i = 0; i != units.size(); i++) {
       glBindVertexArray(units[i].getModelBuffer());
-      units[i].debugInfo();
+      // units[i].debugInfo();
       glUniform4fv(positionHandle, 1, units[i].getPosition());
       if (units[i].getTeam() == 0) {
          glUniform4fv(colourHandle, 1, teamOneColour);
@@ -207,13 +209,14 @@ void initializeGame() {
 }
 
 void buyPeasant() {
-
+   // gameSound->buySucces();
+   gameSound->buyFail();
 }
 
 void buySwordsmen() {
-
+   gameSound->buyFail();
 }
 
 void buyArcher() {
-   
+   gameSound->buyFail();
 }

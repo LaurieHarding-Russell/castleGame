@@ -3,6 +3,7 @@ cc_binary(
     srcs = [
         "CastleGame.cpp",
         "Audio.h",
+        "Audio.cpp",
         "units/Unit.h",
         "units/Castle.h",
         "units/Castle.cpp",
