@@ -129,6 +129,8 @@ void initializeAssets() {
    swordsmanVertexBuffer = loadAsset(Swordsman::getModelFileName());
    archerVertexBuffer = loadAsset(Archer::getModelFileName());
    treeVertexBuffer = loadAsset(Tree::getModelFileName());
+
+   // generateMap();
 }
 
 VertexBufferInfo loadAsset(const char* fileName) {
@@ -139,8 +141,8 @@ VertexBufferInfo loadAsset(const char* fileName) {
    GLuint assetBuffer;
    glGenBuffers(1, &assetBuffer);
    glBindBuffer(GL_ARRAY_BUFFER, assetBuffer);
-   glBufferData(GL_ARRAY_BUFFER, assetGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
-   glBufferSubData(GL_ARRAY_BUFFER, 0, assetGeometry->getVertexCount(), assetGeometry->getVertices());
+   glBufferData(GL_ARRAY_BUFFER, assetGeometry->getVertexCount() * 3, NULL, GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, assetGeometry->getVertexCount() * 3, assetGeometry->getVertices());
    VertexBufferInfo vertexBufferInfo;
    vertexBufferInfo.buffer = assetBuffer;
    vertexBufferInfo.vertexCount = assetGeometry->getVertexCount();
@@ -197,9 +199,10 @@ void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
 
-   glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
-   glUniform4fv(colourHandle, 1, gaiaColour);
-   glDrawArrays(GL_TRIANGLES, 0 , mapVertexBuffer.vertexCount);
+   // glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
+   // glUniform4fv(colourHandle, 1, gaiaColour);
+   // glUniform4fv(positionHandle, 1, postition);
+   // glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3)/3);
    for (uint i = 0; i != units.size(); i++) {
       glBindBuffer(GL_ARRAY_BUFFER, units[i].getModelBuffer());
       // units[i].debugInfo();
@@ -253,27 +256,29 @@ void createUnit() {
 
 // Might make this generate a bumpier map with terrian.
 void generateMap() {
-   mapVertexBuffer.vertexCount = 12;
+   mapVertexBuffer.vertexCount = 36;
 
-   std::array<Vector3, 12> mapData = {
-      Vector3(left, 0, 0),
-      Vector3(right, 0, 0),
-      Vector3(left, 0, 5),
-      
-      Vector3(left, 0, 5),
-      Vector3(right, 0, 0),
-      Vector3(right, 0, 5),
+   float mapData[36] = {
+      left, 0.0, 0.0,
+      right, 0.0, 0.0,
+      left, 0.0, 5.0,
 
-      Vector3(left, 0, 0),
-      Vector3(right, 1, 0),
-      Vector3(left, 1, 0),
+      left, 0.0, 5.0,
+      right, 0.0, 0.0,
+      right, 0.0, 5.0,
+
+      left, 0.0, 0.0,
+      right, 1.0, 0.0,
+      left, 1.0, 0.0,
       
-      Vector3(left, 0, 0),
-      Vector3(right, 0, 0),
-      Vector3(right, 1, 0)
+      left, 0.0, 0.0,
+      right, 0.0, 0.0,
+      right, 1.0, 0.0
    };
+
    glGenBuffers(1, &mapVertexBuffer.buffer);
    glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
    glBufferData(GL_ARRAY_BUFFER, mapVertexBuffer.vertexCount, NULL, GL_STATIC_DRAW);
-   glBufferSubData(GL_ARRAY_BUFFER, 0, mapVertexBuffer.vertexCount, from(mapData));
+   glBufferSubData(GL_ARRAY_BUFFER, 0, mapVertexBuffer.vertexCount, mapData);
+
 }
