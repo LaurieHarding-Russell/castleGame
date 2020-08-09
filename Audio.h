@@ -12,6 +12,7 @@ struct alSoundInfo {
 };
 
 const float MAX_16_BIT = 32760.0;
+const float A_FREQUENCY = 440;
 
 class Audio { 
     private:

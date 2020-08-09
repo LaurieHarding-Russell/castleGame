@@ -4,9 +4,11 @@
 #include <GL/glew.h>
 #include <array>
 #include <string>
+#include <stdio.h>
 #include <iostream>
 #include "CommonTypes.h"
 
+// NOTE: Every class inheriting from Unit should contain a static method getModelFileName. I didn't see an easy way of inforcing this though.
 class Unit {
     private:
     GLuint modelBuffer;

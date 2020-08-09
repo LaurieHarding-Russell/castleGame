@@ -8,16 +8,22 @@
 
 #include "Audio.h"
 #include "units/Castle.h"
+#include "units/Peasant.h"
+#include "units/Swordsman.h"
+#include "units/Archer.h"
+#include "units/Tree.h"
 #include "CommonTypes.h"
 
 void initialize(int argc, char** argv);
 void initializeAssets();
-VertexBufferInfo loadAsset(char* fileName);
+VertexBufferInfo loadAsset(const char* fileName);
 void unInitializeAssets(); 
-ofbx::IScene* loadFbx(char* fileName);
+ofbx::IScene* loadFbx(const char* fileName);
 void display();
 void keyboard(unsigned char key, int x, int y);
 void initializeGame();
+void createUnit();
+void generateMap();
 
 void buyPeasant();
 void buySwordsmen();
@@ -30,8 +36,17 @@ GLuint colourHandle;
 
 int vectorIn;
 
+// FIXME, you guessed it think about this.
 VertexBufferInfo castleVertexBuffer;
+VertexBufferInfo peasantVertexBuffer;
+VertexBufferInfo swordsmanVertexBuffer;
+VertexBufferInfo archerVertexBuffer;
+VertexBufferInfo treeVertexBuffer;
+
+
+// FIXME, think about this.
 std::vector<Unit> units;
+std::vector<Tree> trees;
 
 GLfloat postition[4] = { // FIXME, make a matrix type
    0.0f, 0.0f, 0.0f, 0.0,
@@ -55,6 +70,7 @@ GLfloat projection[16] = { // FIXME, make a matrix type
    0.0f,                0.0f,             0.0f,             1.0f,
 };
 
+GLfloat gaiaColour[4] = {0.0f, 1.0f, 0.0f, 1.0};
 GLfloat teamOneColour[4] = {0.0f, 0.0f, 1.0f, 1.0};
 GLfloat teamTwoColour[4] = {1.0f, 0.0f, 0.0f, 1.0};
 
@@ -106,7 +122,7 @@ void initializeAssets() {
    castleVertexBuffer = loadAsset(Castle::getModelFileName());
 }
 
-VertexBufferInfo loadAsset(char* fileName) {
+VertexBufferInfo loadAsset(const char* fileName) {
    ofbx::IScene* assetScene = loadFbx(fileName);
 
    const ofbx::Geometry* assetGeometry = assetScene->getMesh(0)->getGeometry(); // will move into a objects.
@@ -125,7 +141,7 @@ VertexBufferInfo loadAsset(char* fileName) {
    return vertexBufferInfo;
 }
 
-ofbx::IScene* loadFbx(char* fileName) {
+ofbx::IScene* loadFbx(const char* fileName) {
    FILE* assetFile = fopen(fileName, "rb");
    if (!assetFile) {
       // TODO, uh oh.
@@ -219,4 +235,12 @@ void buySwordsmen() {
 
 void buyArcher() {
    gameSound->buyFail();
+}
+
+void createUnit() {
+
+}
+
+void generateMap() {
+
 }

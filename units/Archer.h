@@ -11,7 +11,7 @@ class Archer : public Unit {
     ~Archer();
 
     // FIXME think about this.
-    static char* getModelFileName() {
+    static const char* getModelFileName() {
         return "assets/box.fbx";
     }
 

@@ -11,6 +11,8 @@ cc_binary(
         "units/Castle.cpp",
         "units/Peasant.h",
         "units/Peasant.cpp",
+        "units/Tree.h",
+        "units/Tree.cpp",
         "units/Swordsman.h",
         "units/Swordsman.cpp",
         "units/Unit.h",

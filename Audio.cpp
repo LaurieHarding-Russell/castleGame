@@ -44,7 +44,7 @@ void Audio::loadAssets() {
 	size_t bufSize = 0.5 * sampleRate;
 	short* samples = new short[bufSize];
 	for (unsigned i = 0; i < bufSize; i++) {
-		samples[i] = MAX_16_BIT * sin(3.1 * i * 440 / sampleRate);
+		samples[i] = MAX_16_BIT * sin(M_PI * i * A_FREQUENCY / sampleRate);
     }
 	alBufferData(alSoundFailInfo.buffer, AL_FORMAT_MONO16, samples, bufSize, sampleRate);
 
@@ -58,7 +58,7 @@ void Audio::loadAssets() {
 	bufSize = 0.5 * sampleRate;
 	samples = new short[bufSize];
 	for (unsigned i = 0; i < bufSize; i++) {
-		samples[i] = MAX_16_BIT * sin(3.1 * i * (440 + i/6) / sampleRate);
+		samples[i] = MAX_16_BIT * sin(M_PI * i * (A_FREQUENCY + i/6) / sampleRate);
     }
 	alBufferData(alSoundSuccessInfo.buffer, AL_FORMAT_MONO16, samples, bufSize, sampleRate);
 

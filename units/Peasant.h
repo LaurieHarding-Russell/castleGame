@@ -11,7 +11,7 @@ class Peasant : public Unit {
     ~Peasant();
 
     // FIXME think about this.
-    static char* getModelFileName() {
+    static const char* getModelFileName() {
         return "assets/box.fbx";
     }
 
