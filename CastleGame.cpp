@@ -42,6 +42,7 @@ VertexBufferInfo peasantVertexBuffer;
 VertexBufferInfo swordsmanVertexBuffer;
 VertexBufferInfo archerVertexBuffer;
 VertexBufferInfo treeVertexBuffer;
+VertexBufferInfo mapVertexBuffer;
 
 
 // FIXME, think about this.
@@ -119,16 +120,21 @@ void initialize(int argc, char** argv) {
 }
 
 void initializeAssets() {
+   GLuint vertexBuffer;
+   glGenVertexArrays(1, &vertexBuffer);
+   glBindVertexArray(vertexBuffer);
+
    castleVertexBuffer = loadAsset(Castle::getModelFileName());
+   peasantVertexBuffer = loadAsset(Peasant::getModelFileName());
+   swordsmanVertexBuffer = loadAsset(Swordsman::getModelFileName());
+   archerVertexBuffer = loadAsset(Archer::getModelFileName());
+   treeVertexBuffer = loadAsset(Tree::getModelFileName());
 }
 
 VertexBufferInfo loadAsset(const char* fileName) {
    ofbx::IScene* assetScene = loadFbx(fileName);
 
    const ofbx::Geometry* assetGeometry = assetScene->getMesh(0)->getGeometry(); // will move into a objects.
-   GLuint vertexBuffer;
-   glGenVertexArrays(1, &vertexBuffer);
-   glBindVertexArray(vertexBuffer);
 
    GLuint assetBuffer;
    glGenBuffers(1, &assetBuffer);
@@ -136,7 +142,7 @@ VertexBufferInfo loadAsset(const char* fileName) {
    glBufferData(GL_ARRAY_BUFFER, assetGeometry->getVertexCount(), NULL, GL_STATIC_DRAW);
    glBufferSubData(GL_ARRAY_BUFFER, 0, assetGeometry->getVertexCount(), assetGeometry->getVertices());
    VertexBufferInfo vertexBufferInfo;
-   vertexBufferInfo.vertexBuffer = vertexBuffer;
+   vertexBufferInfo.buffer = assetBuffer;
    vertexBufferInfo.vertexCount = assetGeometry->getVertexCount();
    return vertexBufferInfo;
 }
@@ -190,8 +196,12 @@ void keyboard(unsigned char key, int x, int y) {
 void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
+
+   glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
+   glUniform4fv(colourHandle, 1, gaiaColour);
+   glDrawArrays(GL_TRIANGLES, 0 , mapVertexBuffer.vertexCount);
    for (uint i = 0; i != units.size(); i++) {
-      glBindVertexArray(units[i].getModelBuffer());
+      glBindBuffer(GL_ARRAY_BUFFER, units[i].getModelBuffer());
       // units[i].debugInfo();
       glUniform4fv(positionHandle, 1, units[i].getPosition());
       if (units[i].getTeam() == 0) {
@@ -212,12 +222,12 @@ void initializeGame() {
    
    Castle playerOne = Castle(playerOneCastleStartPostition);
    playerOne.setTeam(0);
-   playerOne.setModelBuffer(castleVertexBuffer.vertexBuffer);
+   playerOne.setModelBuffer(castleVertexBuffer.buffer);
    playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
 
    Castle playerTwo = Castle(playerTwoCastleStartPostition);
    playerTwo.setTeam(1);
-   playerTwo.setModelBuffer(castleVertexBuffer.vertexBuffer);
+   playerTwo.setModelBuffer(castleVertexBuffer.buffer);
    playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
 
    units.push_back(playerOne);
@@ -241,6 +251,29 @@ void createUnit() {
 
 }
 
+// Might make this generate a bumpier map with terrian.
 void generateMap() {
+   mapVertexBuffer.vertexCount = 12;
 
+   std::array<Vector3, 12> mapData = {
+      Vector3(left, 0, 0),
+      Vector3(right, 0, 0),
+      Vector3(left, 0, 5),
+      
+      Vector3(left, 0, 5),
+      Vector3(right, 0, 0),
+      Vector3(right, 0, 5),
+
+      Vector3(left, 0, 0),
+      Vector3(right, 1, 0),
+      Vector3(left, 1, 0),
+      
+      Vector3(left, 0, 0),
+      Vector3(right, 0, 0),
+      Vector3(right, 1, 0)
+   };
+   glGenBuffers(1, &mapVertexBuffer.buffer);
+   glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
+   glBufferData(GL_ARRAY_BUFFER, mapVertexBuffer.vertexCount, NULL, GL_STATIC_DRAW);
+   glBufferSubData(GL_ARRAY_BUFFER, 0, mapVertexBuffer.vertexCount, from(mapData));
 }

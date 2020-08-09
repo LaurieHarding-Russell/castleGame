@@ -5,7 +5,7 @@
 #include <array>
 
 struct VertexBufferInfo {
-   GLuint vertexBuffer;
+   GLuint buffer;
    int vertexCount;
 };
 
@@ -24,6 +24,17 @@ struct Vector3 {
       return new float[3]{x, y, z};
    }
 };
+
+// FIXME, research template. This is a lot of compiler magic.
+template<std::size_t SIZE>
+float* from(std::array<Vector3, SIZE> array) {
+   float* result = new float[3 * array.size()];
+   for(int i = 0; i != array.size(); i++) {
+      float* floatArray = array[i].toFloatArray();
+      std::copy(array[0].toFloatArray(), floatArray + 3, result + 3 * i);
+   }
+   return result;
+}
 
 struct Vector4 {
    GLfloat x;
