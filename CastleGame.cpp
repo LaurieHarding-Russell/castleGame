@@ -5,6 +5,9 @@
 #include "ofbx.h"
 #include <array>
 #include <vector>
+#include <chrono>
+#include <random>
+#include <ctime>
 
 #include "Audio.h"
 #include "units/Castle.h"
@@ -14,13 +17,18 @@
 #include "units/Tree.h"
 #include "CommonTypes.h"
 
+using namespace std::chrono;
+
 void initialize(int argc, char** argv);
 void initializeAssets();
 VertexBufferInfo loadAsset(const char* fileName);
 void unInitializeAssets(); 
 ofbx::IScene* loadFbx(const char* fileName);
+
 void display();
 void keyboard(unsigned char key, int x, int y);
+void gameProcess();
+
 void initializeGame();
 void createUnit();
 void generateMap();
@@ -35,6 +43,9 @@ GLuint positionHandle;
 GLuint colourHandle;
 
 int vectorIn;
+
+milliseconds lastUpdatedTime;
+milliseconds timeSinceLastTreeGenerationTry = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
 
 // FIXME, you guessed it think about this.
 VertexBufferInfo castleVertexBuffer;
@@ -76,6 +87,7 @@ GLfloat teamOneColour[4] = {0.0f, 0.0f, 1.0f, 1.0};
 GLfloat teamTwoColour[4] = {1.0f, 0.0f, 0.0f, 1.0};
 
 int main(int argc, char** argv) {
+   srand (std::time(NULL));
    gameSound = new Audio();
 
    initialize(argc, argv);
@@ -116,6 +128,9 @@ void initialize(int argc, char** argv) {
 
    glutDisplayFunc(display); 
    glutKeyboardFunc (keyboard);
+   glutIdleFunc(gameProcess);
+
+   lastUpdatedTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
    glutMainLoop();
 }
 
@@ -190,7 +205,7 @@ void keyboard(unsigned char key, int x, int y) {
 
       #ifdef DEBUG
       default:
-         std::cout<< "key pressed: "  << key << "\n\n";
+         std::cout<< "key pressed: "  << int(key) << "\n\n";
       #endif
    }
 }
@@ -199,10 +214,11 @@ void display() {
    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
 
-   // glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
-   // glUniform4fv(colourHandle, 1, gaiaColour);
-   // glUniform4fv(positionHandle, 1, postition);
-   // glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3)/3);
+   glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
+   glUniform4fv(colourHandle, 1, gaiaColour);
+   glUniform4fv(positionHandle, 1, postition);
+   glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3)/3);
+
    for (uint i = 0; i != units.size(); i++) {
       glBindBuffer(GL_ARRAY_BUFFER, units[i].getModelBuffer());
       // units[i].debugInfo();
@@ -212,12 +228,43 @@ void display() {
       } else {
          glUniform4fv(colourHandle, 1, teamTwoColour);
       }
-      glDrawArrays(GL_TRIANGLES, 0 ,units[i].getModelNumberOfTraingles());
+      glDrawArrays(GL_TRIANGLES, 0 , units[i].getModelNumberOfTraingles());
+   }
+
+   for (uint i = 0; i != trees.size(); i++) {
+      glBindBuffer(GL_ARRAY_BUFFER, trees[i].getModelBuffer());
+      glUniform4fv(positionHandle, 1, trees[i].getPosition());
+      glUniform4fv(colourHandle, 1, gaiaColour);
+
+      glDrawArrays(GL_TRIANGLES, 0 , units[i].getModelNumberOfTraingles());
    }
 
    glutSwapBuffers();
 
 }
+
+void gameProcess() {
+   milliseconds currentTime = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+   milliseconds timeDiff = lastUpdatedTime - currentTime;
+
+   if ((currentTime - timeSinceLastTreeGenerationTry).count() > 5000) {
+      float x = (rand() % 20) + left + 10;
+      float y = 0;
+      Tree tree = Tree({ x, y, 0});
+      tree.setTeam(-1);
+      tree.setModelBuffer(treeVertexBuffer.buffer);
+      tree.setModelNumberOfTraingles(treeVertexBuffer.vertexCount);
+
+      trees.push_back(tree);
+      timeSinceLastTreeGenerationTry = currentTime;
+   }
+
+   // update unit positions and velocity
+
+   lastUpdatedTime = currentTime;
+
+}
+
 
 void initializeGame() {
    Vector3 playerOneCastleStartPostition = Vector3(left, 0.0, 0.0);
