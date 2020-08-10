@@ -5,6 +5,7 @@ cc_binary(
         "Audio.h",
         "Audio.cpp",
         "CommonTypes.h",
+        "GameData.h",
         "units/Archer.h",
         "units/Archer.cpp",
         "units/Castle.h",

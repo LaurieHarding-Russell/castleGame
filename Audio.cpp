@@ -31,8 +31,13 @@ void Audio::setupBackgroundMusic() {
 
 void Audio::buyFail() {
 	alSourcei(alSoundFailInfo.source, AL_BUFFER, alSoundFailInfo.buffer);
-    alSourcef(alBackgroundMusicInfo.source, AL_GAIN, soundEffects);
+    alSourcef(alSoundFailInfo.source, AL_GAIN, soundEffects);
 	alSourcePlay(alSoundFailInfo.source);
+}
+
+void Audio::buySuccess() {
+    alSourcef(alSoundSuccessInfo.source, AL_GAIN, soundEffects);
+	alSourcePlay(alSoundSuccessInfo.source);
 }
 
 void Audio::loadAssets() {
@@ -47,6 +52,7 @@ void Audio::loadAssets() {
 		samples[i] = MAX_16_BIT * sin(M_PI * i * A_FREQUENCY / sampleRate);
     }
 	alBufferData(alSoundFailInfo.buffer, AL_FORMAT_MONO16, samples, bufSize, sampleRate);
+    alSourcei(alSoundFailInfo.source, AL_BUFFER, alSoundFailInfo.buffer);
 
 	delete[] samples;
 
@@ -58,11 +64,13 @@ void Audio::loadAssets() {
 	bufSize = 0.5 * sampleRate;
 	samples = new short[bufSize];
 	for (unsigned i = 0; i < bufSize; i++) {
-		samples[i] = MAX_16_BIT * sin(M_PI * i * (A_FREQUENCY + i/6) / sampleRate);
+		samples[i] = MAX_16_BIT * sin(M_PI * i * (A_FREQUENCY + i)/8 / sampleRate);
     }
 	alBufferData(alSoundSuccessInfo.buffer, AL_FORMAT_MONO16, samples, bufSize, sampleRate);
+    alSourcei(alSoundSuccessInfo.source, AL_BUFFER, alSoundSuccessInfo.buffer);
 
 	delete[] samples;
+    
 }
 
 Audio::Audio() {

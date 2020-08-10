@@ -10,12 +10,8 @@
 #include <ctime>
 
 #include "Audio.h"
-#include "units/Castle.h"
-#include "units/Peasant.h"
-#include "units/Swordsman.h"
-#include "units/Archer.h"
-#include "units/Tree.h"
 #include "CommonTypes.h"
+#include "GameData.h"
 
 using namespace std::chrono;
 
@@ -24,18 +20,19 @@ void initializeAssets();
 VertexBufferInfo loadAsset(const char* fileName);
 void unInitializeAssets(); 
 ofbx::IScene* loadFbx(const char* fileName);
+GameData gameData = GameData();
 
 void display();
 void keyboard(unsigned char key, int x, int y);
 void gameProcess();
 
-void initializeGame();
-void createUnit();
-void generateMap();
-
 void buyPeasant();
 void buySwordsmen();
 void buyArcher();
+
+void createUnit();
+void generateMap();
+
 
 Audio* gameSound = NULL;
 GLuint basicShader;
@@ -55,36 +52,14 @@ VertexBufferInfo archerVertexBuffer;
 VertexBufferInfo treeVertexBuffer;
 VertexBufferInfo mapVertexBuffer;
 
-
-// FIXME, think about this.
-std::vector<Unit> units;
-std::vector<Tree> trees;
-
-GLfloat postition[4] = { // FIXME, make a matrix type
-   0.0f, 0.0f, 0.0f, 0.0,
-};
-
 // FIXME, think about projections
 // OpenGL clips between 1.0 and -1.0 for the different axis.
-int sizeX = 1200;
-int sizeY = 600;
-float right = 20;
-float left = -20;
-float top = 10;
-float bottom = -10;
-float far = -10;
-float near = 10;
-
 GLfloat projection[16] = { // FIXME, make a matrix type
    2.0f/(right-left),   0.0f,             0.0f,             -((right+left)/(right-left)),
    0.0f,                2.0f/(top-bottom),0.0f,             -((top + bottom)/(top-bottom)),
    0.0f,                0.0f,             -2.0f/(far-near), -((far + near)/(far-near)),
    0.0f,                0.0f,             0.0f,             1.0f,
 };
-
-GLfloat gaiaColour[4] = {0.0f, 1.0f, 0.0f, 1.0};
-GLfloat teamOneColour[4] = {0.0f, 0.0f, 1.0f, 1.0};
-GLfloat teamTwoColour[4] = {1.0f, 0.0f, 0.0f, 1.0};
 
 int main(int argc, char** argv) {
    srand (std::time(NULL));
@@ -118,7 +93,7 @@ void initialize(int argc, char** argv) {
 
    // FIXME, probably should have a splash screen
    initializeAssets();
-   initializeGame();
+   gameData.initializeGame(castleVertexBuffer);
 
    vectorIn = glGetAttribLocation(basicShader, "vectorIn");
 	glEnableVertexAttribArray(vectorIn);
@@ -222,24 +197,24 @@ void display() {
    glUniform4fv(positionHandle, 1, postition);
    glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3));
 
-   for (uint i = 0; i != units.size(); i++) {
-      glBindBuffer(GL_ARRAY_BUFFER, units[i].getModelBuffer());
+   for (uint i = 0; i != gameData.getUnits().size(); i++) {
+      glBindBuffer(GL_ARRAY_BUFFER, gameData.getUnits()[i].getModelBuffer());
       // units[i].debugInfo();
-      glUniform4fv(positionHandle, 1, units[i].getPosition());
-      if (units[i].getTeam() == 0) {
+      glUniform4fv(positionHandle, 1, gameData.getUnits()[i].getPosition());
+      if (gameData.getUnits()[i].getTeam() == 0) {
          glUniform4fv(colourHandle, 1, teamOneColour);
       } else {
          glUniform4fv(colourHandle, 1, teamTwoColour);
       }
-      glDrawArrays(GL_TRIANGLES, 0 , units[i].getModelNumberOfTraingles());
+      glDrawArrays(GL_TRIANGLES, 0 , gameData.getUnits()[i].getModelNumberOfTraingles());
    }
 
-   for (uint i = 0; i != trees.size(); i++) {
-      glBindBuffer(GL_ARRAY_BUFFER, trees[i].getModelBuffer());
-      glUniform4fv(positionHandle, 1, trees[i].getPosition());
+   for (uint i = 0; i != gameData.getTrees().size(); i++) {
+      glBindBuffer(GL_ARRAY_BUFFER, gameData.getTrees()[i].getModelBuffer());
+      glUniform4fv(positionHandle, 1, gameData.getTrees()[i].getPosition());
       glUniform4fv(colourHandle, 1, gaiaColour);
       // trees[i].debugInfo();
-      glDrawArrays(GL_TRIANGLES, 0 , units[i].getModelNumberOfTraingles());
+      glDrawArrays(GL_TRIANGLES, 0 , gameData.getTrees()[i].getModelNumberOfTraingles());
    }
 
    glutSwapBuffers();
@@ -257,8 +232,7 @@ void gameProcess() {
       tree.setTeam(-1);
       tree.setModelBuffer(treeVertexBuffer.buffer);
       tree.setModelNumberOfTraingles(treeVertexBuffer.vertexCount);
-
-      trees.push_back(tree);
+      gameData.addTree(tree);
       timeSinceLastTreeGenerationTry = currentTime;
    }
 
@@ -268,28 +242,13 @@ void gameProcess() {
    glutPostRedisplay();
 }
 
-
-void initializeGame() {
-   Vector3 playerOneCastleStartPostition = Vector3(left, 0.0, 0.0);
-   Vector3 playerTwoCastleStartPostition = Vector3(right, 0.0, 0.0);
-   
-   Castle playerOne = Castle(playerOneCastleStartPostition);
-   playerOne.setTeam(0);
-   playerOne.setModelBuffer(castleVertexBuffer.buffer);
-   playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
-
-   Castle playerTwo = Castle(playerTwoCastleStartPostition);
-   playerTwo.setTeam(1);
-   playerTwo.setModelBuffer(castleVertexBuffer.buffer);
-   playerOne.setModelNumberOfTraingles(castleVertexBuffer.vertexCount);
-
-   units.push_back(playerOne);
-   units.push_back(playerTwo);
-}
-
+// FIXME, A part of me wants to move this into game data... idk.
 void buyPeasant() {
-   // gameSound->buySucces();
-   gameSound->buyFail();
+   if (gameData.buyPeasant(0, peasantVertexBuffer)) {
+      gameSound->buySuccess();
+   } else {
+      gameSound->buyFail();
+   }
 }
 
 void buySwordsmen() {

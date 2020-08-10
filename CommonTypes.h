@@ -19,6 +19,16 @@ struct Vector3 {
       this->y = y;
       this->z = z;
    }
+   Vector3(float* array) {
+      operator=(array);
+   }
+
+   Vector3 operator=(float* array) {
+      this->x = array[0];
+      this->y = array[1];
+      this->z = array[2];
+      return *this;
+   }
 
    float* toFloatArray() {
       return new float[3]{x, y, z};

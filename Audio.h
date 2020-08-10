@@ -33,6 +33,7 @@ class Audio {
     public:
     Audio();
     void buyFail();
+    void buySuccess();
     ~Audio();
 };
 
