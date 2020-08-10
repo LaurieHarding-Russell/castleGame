@@ -119,7 +119,7 @@ void initializeAssets() {
    archerVertexBuffer = loadAsset(Archer::getModelFileName());
    treeVertexBuffer = loadAsset(Tree::getModelFileName());
 
-   // generateMap();
+   generateMap();
 }
 
 VertexBufferInfo loadAsset(const char* fileName) {
