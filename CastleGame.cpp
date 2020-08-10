@@ -204,6 +204,9 @@ void keyboard(unsigned char key, int x, int y) {
          break;
 
       #ifdef DEBUG
+      case '9': // tab for debugging whatever
+         break;
+
       default:
          std::cout<< "key pressed: "  << int(key) << "\n\n";
       #endif
@@ -217,7 +220,7 @@ void display() {
    glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
    glUniform4fv(colourHandle, 1, gaiaColour);
    glUniform4fv(positionHandle, 1, postition);
-   glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3)/3);
+   glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3));
 
    for (uint i = 0; i != units.size(); i++) {
       glBindBuffer(GL_ARRAY_BUFFER, units[i].getModelBuffer());
@@ -235,7 +238,7 @@ void display() {
       glBindBuffer(GL_ARRAY_BUFFER, trees[i].getModelBuffer());
       glUniform4fv(positionHandle, 1, trees[i].getPosition());
       glUniform4fv(colourHandle, 1, gaiaColour);
-
+      // trees[i].debugInfo();
       glDrawArrays(GL_TRIANGLES, 0 , units[i].getModelNumberOfTraingles());
    }
 
@@ -262,7 +265,7 @@ void gameProcess() {
    // update unit positions and velocity
 
    lastUpdatedTime = currentTime;
-
+   glutPostRedisplay();
 }
 
 
