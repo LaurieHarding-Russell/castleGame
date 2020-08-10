@@ -30,7 +30,6 @@ void buyPeasant();
 void buySwordsmen();
 void buyArcher();
 
-void createUnit();
 void generateMap();
 
 
@@ -195,7 +194,7 @@ void display() {
    glBindBuffer(GL_ARRAY_BUFFER, mapVertexBuffer.buffer);
    glUniform4fv(colourHandle, 1, gaiaColour);
    glUniform4fv(positionHandle, 1, postition);
-   glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3));
+   glDrawArrays(GL_TRIANGLES, 0 , (mapVertexBuffer.vertexCount/3)/3);
 
    for (uint i = 0; i != gameData.getUnits().size(); i++) {
       glBindBuffer(GL_ARRAY_BUFFER, gameData.getUnits()[i].getModelBuffer());
@@ -252,15 +251,19 @@ void buyPeasant() {
 }
 
 void buySwordsmen() {
-   gameSound->buyFail();
+   if (gameData.buySwordsmen(0, swordsmanVertexBuffer)) {
+      gameSound->buySuccess();
+   } else {
+      gameSound->buyFail();
+   }
 }
 
 void buyArcher() {
-   gameSound->buyFail();
-}
-
-void createUnit() {
-
+   if (gameData.buyArcher(0, archerVertexBuffer)) {
+      gameSound->buySuccess();
+   } else {
+      gameSound->buyFail();
+   }
 }
 
 // Might make this generate a bumpier map with terrian.

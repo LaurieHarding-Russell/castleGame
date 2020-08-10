@@ -74,6 +74,11 @@ class Unit {
         return team;
     }
 
+    virtual void aiInput() {
+        // This function will run and get the unit AI's actions movement/attack  
+        // example peasants will try and move towards the nearest tree to cut it down.
+    };
+
     #ifdef DEBUG
     void debugInfo() {
         std::cout << "info\n";

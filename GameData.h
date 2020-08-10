@@ -22,7 +22,7 @@ float far = -10;
 float near = 10;
 
 GLfloat postition[4] = { // FIXME, make a matrix type
-   0.0f, 0.0f, 0.0f, 0.0,
+   0.0f, 0.0f, 0.0f, 0.0f,
 };
 
 GLfloat gaiaColour[4] = {0.0f, 1.0f, 0.0f, 1.0};
@@ -74,14 +74,40 @@ class GameData {
         units.push_back(unit);
     }
 
-    bool buyPeasant(int team, VertexBufferInfo peasantVertexBufferInfo) {
-        if (player[team].gold > 1) {
+    bool buyPeasant(int team, VertexBufferInfo vertexBufferInfo) {
+        if (player[team].gold >= 1) {
             player[team].gold--;
             Peasant peasant = Peasant(Vector3(getCastleSpawnLocation(0)));
             peasant.setTeam(0);
-            peasant.setModelBuffer(peasantVertexBufferInfo.buffer);
-            peasant.setModelNumberOfTraingles(peasantVertexBufferInfo.vertexCount);
+            peasant.setModelBuffer(vertexBufferInfo.buffer);
+            peasant.setModelNumberOfTraingles(vertexBufferInfo.vertexCount);
             addUnit(peasant);
+            return true;
+        }
+        return false;
+    }
+
+    bool buySwordsmen(int team, VertexBufferInfo vertexBufferInfo) {
+        if (player[team].gold > 20) {
+            player[team].gold += -20;
+            Swordsman swordsman = Swordsman(Vector3(getCastleSpawnLocation(0)));
+            swordsman.setTeam(0);
+            swordsman.setModelBuffer(vertexBufferInfo.buffer);
+            swordsman.setModelNumberOfTraingles(vertexBufferInfo.vertexCount);
+            addUnit(swordsman);
+            return true;
+        }
+        return false;
+    }
+
+    bool buyArcher(int team, VertexBufferInfo vertexBufferInfo) {
+        if (player[team].gold > 30) {
+            player[team].gold += -30;
+            Archer archer = Archer(Vector3(getCastleSpawnLocation(0)));
+            archer.setTeam(0);
+            archer.setModelBuffer(vertexBufferInfo.buffer);
+            archer.setModelNumberOfTraingles(vertexBufferInfo.vertexCount);
+            addUnit(archer);
             return true;
         }
         return false;
